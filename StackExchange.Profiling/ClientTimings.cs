@@ -27,12 +27,12 @@ namespace StackExchange.Profiling
             get
             {
                 lock(_lockObject)
-                    return _timings;
+                    return new List<ClientTiming>(_timings);
             }
             set
             {
                 lock(_lockObject)
-                    _timings = value;
+                    _timings = new List<ClientTiming>(value);
             }
         }
 
