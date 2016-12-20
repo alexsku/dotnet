@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 
 namespace StackExchange.Profiling
 {
@@ -20,7 +16,8 @@ namespace StackExchange.Profiling
             }
         }
 
-        protected override Timing CurrentHead {
+        protected override Timing CurrentHead
+        {
             get
             {
                 return _currentTiming.Value;
@@ -31,7 +28,7 @@ namespace StackExchange.Profiling
             }
         }
 
-        private AsyncLocal<MiniProfiler> _currentProfiler = new AsyncLocal<MiniProfiler>();
-        private AsyncLocal<Timing> _currentTiming = new AsyncLocal<Timing>();
+        private readonly AsyncLocal<MiniProfiler> _currentProfiler = new AsyncLocal<MiniProfiler>();
+        private readonly AsyncLocal<Timing> _currentTiming = new AsyncLocal<Timing>();
     }
 }

@@ -56,7 +56,7 @@ namespace StackExchange.Profiling.Wcf
             if (timing.Children != null)
             {
                 // This assumes that trivial items do not have any non-trivial children
-                timing.AccessChildren()?.RemoveAll(child => child.IsTrivial);
+                timing.RemoveMatchingChildren(child => child.IsTrivial);
             }
 
             Debug.Assert(timing.Children != null, "timing.Children != null");

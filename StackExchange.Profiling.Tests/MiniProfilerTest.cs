@@ -50,9 +50,9 @@ namespace StackExchange.Profiling.Tests
             }
         }
 
-        [Test]
-        public async void Current_WhenAsyncMethodReturns_IsCarried(
-            [Values(true,false)]bool comfigureAwait
+        [Theory]
+        public async Task Current_WhenAsyncMethodReturns_IsCarried(
+            bool configureAwait
             )
         {
             MiniProfiler.Settings.ProfilerProvider = new AsyncWebRequestProfilerProvider();
@@ -61,7 +61,7 @@ namespace StackExchange.Profiling.Tests
                 MiniProfiler.Start();
 
                 var c = MiniProfiler.Current;
-                await Task.Delay(TimeSpan.FromMilliseconds(1)).ConfigureAwait(comfigureAwait);
+                await Task.Delay(TimeSpan.FromMilliseconds(1)).ConfigureAwait(configureAwait);
                 Assert.That(HttpContext.Current, Is.Null);
 
                 Assert.That(MiniProfiler.Current, Is.Not.Null);
@@ -69,9 +69,9 @@ namespace StackExchange.Profiling.Tests
             }
         }
 
-        [Test]
-        public async void Head_WhenAsyncMethodReturns_IsCarried(
-            [Values(true,false)]bool comfigureAwait
+        [Theory]
+        public async Task Head_WhenAsyncMethodReturns_IsCarried(
+            bool configureAwait
             )
         {
             MiniProfiler.Settings.ProfilerProvider = new AsyncWebRequestProfilerProvider();
@@ -81,7 +81,7 @@ namespace StackExchange.Profiling.Tests
                 var sut = MiniProfiler.Current;
                 var head = sut.Head;
 
-                await Task.Delay(TimeSpan.FromMilliseconds(1)).ConfigureAwait(comfigureAwait);
+                await Task.Delay(TimeSpan.FromMilliseconds(1)).ConfigureAwait(configureAwait);
                 Assert.That(HttpContext.Current, Is.Null);
 
                 Assert.That(sut.Head, Is.Not.Null);
@@ -90,9 +90,7 @@ namespace StackExchange.Profiling.Tests
         }
 
         [Test]
-        public async void Head_WhenMultipleTasksSpawned_EachSetsItsOwnHead(
-            [Values(true,false)]bool comfigureAwait
-            )
+        public void Head_WhenMultipleTasksSpawned_EachSetsItsOwnHead()
         {
             MiniProfiler.Settings.ProfilerProvider = new AsyncWebRequestProfilerProvider();
             var allTasks = new SemaphoreSlim(0, 1);
@@ -110,7 +108,7 @@ namespace StackExchange.Profiling.Tests
                         allTasks.Release();
                         completed.Task.Wait();
                     }
-                }).ConfigureAwait(comfigureAwait);
+                });
                 allTasks.Wait();
                 Task.Run(() => {
                     using (sut.Step("test2"))
@@ -118,8 +116,9 @@ namespace StackExchange.Profiling.Tests
                         allTasks.Release();
                         completed.Task.Wait();
                     }
-                }).ConfigureAwait(comfigureAwait);
+                });
                 allTasks.Wait();
+
                 Assert.That(sut.Head, Is.Not.Null);
                 Assert.That(sut.Head, Is.EqualTo(head));
                 completed.SetResult(0);

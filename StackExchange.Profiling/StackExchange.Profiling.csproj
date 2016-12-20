@@ -65,7 +65,6 @@
     <Compile Include="ClientTimings.cs" />
     <Compile Include="CustomTiming.cs" />
     <Compile Include="Helpers\Compression.cs" />
-    <Compile Include="Helpers\SynchronizedCollection.cs" />
     <Compile Include="MiniProfilerHandler.cs">
       <SubType>Code</SubType>
     </Compile>

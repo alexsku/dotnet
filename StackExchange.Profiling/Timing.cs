@@ -81,7 +81,7 @@ namespace StackExchange.Profiling
         /// Gets or sets All sub-steps that occur within this Timing step. Add new children through <see cref="AddChild"/>
         /// </summary>
         [DataMember(Order = 5)]
-        public IList<Timing> Children
+        public List<Timing> Children
         {
             get
             {
@@ -90,30 +90,68 @@ namespace StackExchange.Profiling
                     return _children == null ? null : new List<Timing>(_children);
                 }
             }
-            set { _children = value == null ? null : new List<Timing>(value); }
+            set
+            {
+                lock(_lockObject)
+                {
+                    _children = value == null ? null : new List<Timing>(value);
+                }
+            }
         }
 
         /// <summary>
         /// Gets or sets All sub-steps that occur within this Timing step. Add new children through <see cref="AddChild"/>
         /// </summary>
-        public IList<Timing> AccessChildren()
+        public void RemoveMatchingChildren(Predicate<Timing> match)
         {
-            return new SynchronizedCollection<Timing>(_lockObject, _children);
+            lock (_lockObject)
+            {
+                
+                _children.RemoveAll(match);
+            }
         }
 
         /// <summary>
         /// <see cref="CustomTiming"/> lists keyed by their type, e.g. "sql", "memcache", "redis", "http".
         /// </summary>
         [DataMember(Order = 6)]
-        public Dictionary<string, List<CustomTiming>> CustomTimings { get; set; }
-        
+        public Dictionary<string, List<CustomTiming>> CustomTimings
+        {
+            get
+            {
+                lock(_lockObject)
+                {
+                    return _customTimings.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
+                }
+            }
+            set
+            {
+                lock(_lockObject)
+                {
+                    _customTimings = value.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
+                }
+            }
+        }
+
         /// <summary>
         /// JSON representing the Custom Timings associated with this timing.
         /// </summary>
         [ScriptIgnore]
         public string CustomTimingsJson {
-            get { return CustomTimings != null ? CustomTimings.ToJson() : null; }
-            set { CustomTimings = value.FromJson<Dictionary<string, List<CustomTiming>>>(); }
+            get
+            {
+                lock(_lockObject)
+                {
+                    return _customTimings != null ? _customTimings.ToJson() : null;
+                }
+            }
+            set
+            {
+                lock(_lockObject)
+                {
+                    _customTimings = value.FromJson<Dictionary<string, List<CustomTiming>>>();
+                }
+            }
         }
         
         /// <summary>
@@ -122,7 +160,13 @@ namespace StackExchange.Profiling
         [ScriptIgnore]
         public bool HasCustomTimings
         {
-            get { return CustomTimings != null && CustomTimings.Any(pair => pair.Value != null && pair.Value.Any()); }
+            get
+            {
+                lock(_lockObject)
+                {
+                    return _customTimings != null && _customTimings.Any(pair => pair.Value != null && pair.Value.Any());
+                }
+            }
         }
 
         /// <summary>
@@ -316,7 +360,10 @@ namespace StackExchange.Profiling
         /// <param name="customTiming">Duration and command information</param>
         public void AddCustomTiming(string category, CustomTiming customTiming)
         {
-            GetCustomTimingList(category).Add(customTiming);
+            lock (_lockObject)
+            {
+                GetCustomTimingList(category).Add(customTiming);
+            }
         }
 
         internal void RemoveCustomTiming(string category, CustomTiming customTiming)
@@ -325,7 +372,8 @@ namespace StackExchange.Profiling
         }
 
         private readonly object _lockObject = new object();
-        private IList<Timing> _children;
+        private List<Timing> _children;
+        private Dictionary<string, List<CustomTiming>> _customTimings;
 
         /// <summary>
         /// Returns the <see cref="CustomTiming"/> list keyed to the <paramref name="category"/>, creating any collections when null.
@@ -333,20 +381,14 @@ namespace StackExchange.Profiling
         /// <param name="category">The kind of custom timings, e.g. "sql", "redis", "memcache"</param>
         private List<CustomTiming> GetCustomTimingList(string category)
         {
-            lock (_lockObject)
-            {
-                if (CustomTimings == null)
-                    CustomTimings = new Dictionary<string, List<CustomTiming>>();
-            }
+            if (_customTimings == null)
+                _customTimings = new Dictionary<string, List<CustomTiming>>();
 
             List<CustomTiming> result;
-            lock (CustomTimings)
+            if (!_customTimings.TryGetValue(category, out result))
             {
-                if (!CustomTimings.TryGetValue(category, out result))
-                {
-                    result = new List<CustomTiming>();
-                    CustomTimings[category] = result;
-                }
+                result = new List<CustomTiming>();
+                _customTimings[category] = result;
             }
             return result;
         }
