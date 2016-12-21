@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -147,8 +148,8 @@ namespace StackExchange.Profiling.Tests
                 }
                 MiniProfiler.Stop();
 
-                Assert.IsTrue(mp1.Root.Children.Contains(goodTiming));
-                Assert.IsTrue(!mp1.Root.Children.Contains(badTiming));
+                Assert.IsTrue(mp1.Root.Children.ToList().Contains(goodTiming));
+                Assert.IsTrue(!mp1.Root.Children.ToList().Contains(badTiming));
             }
         }
 

@@ -22,17 +22,17 @@ namespace StackExchange.Profiling
         /// Gets or sets the list of client side timings
         /// </summary>  
         [DataMember(Order = 2)]
-        public List<ClientTiming> Timings
+        public IReadOnlyList<ClientTiming> Timings
         {
             get
             {
                 lock(_lockObject)
-                    return new List<ClientTiming>(_timings);
+                    return _timings == null ? null : new List<ClientTiming>(_timings);
             }
             set
             {
                 lock(_lockObject)
-                    _timings = new List<ClientTiming>(value);
+                    _timings = value == null ? null : new List<ClientTiming>(value);
             }
         }
 

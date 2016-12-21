@@ -81,7 +81,7 @@ namespace StackExchange.Profiling
         /// Gets or sets All sub-steps that occur within this Timing step. Add new children through <see cref="AddChild"/>
         /// </summary>
         [DataMember(Order = 5)]
-        public List<Timing> Children
+        public IReadOnlyList<Timing> Children
         {
             get
             {
@@ -105,9 +105,8 @@ namespace StackExchange.Profiling
         public void RemoveMatchingChildren(Predicate<Timing> match)
         {
             lock (_lockObject)
-            {
-                
-                _children.RemoveAll(match);
+            {   
+                _children?.RemoveAll(match);
             }
         }
 
@@ -115,20 +114,20 @@ namespace StackExchange.Profiling
         /// <see cref="CustomTiming"/> lists keyed by their type, e.g. "sql", "memcache", "redis", "http".
         /// </summary>
         [DataMember(Order = 6)]
-        public Dictionary<string, List<CustomTiming>> CustomTimings
+        public IReadOnlyDictionary<string, IReadOnlyList<CustomTiming>> CustomTimings
         {
             get
             {
                 lock(_lockObject)
                 {
-                    return _customTimings.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
+                    return _customTimings?.ToDictionary(p => p.Key, p => (IReadOnlyList<CustomTiming>)new List<CustomTiming>(p.Value));
                 }
             }
             set
             {
                 lock(_lockObject)
                 {
-                    _customTimings = value.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
+                    _customTimings = value?.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
                 }
             }
         }
