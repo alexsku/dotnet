@@ -210,7 +210,7 @@ namespace StackExchange.Profiling.Tests
                     Console.WriteLine();
 
                     var ct1 = pair1.Value;
-                    IReadOnlyList<CustomTiming> ct2;
+                    List<CustomTiming> ct2;
                     Assert.True(t2.CustomTimings.TryGetValue(pair1.Key, out ct2));
 
                     for (int i = 0; i < ct1.Count; i++)
