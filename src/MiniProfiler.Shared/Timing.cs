@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using StackExchange.Profiling.Helpers;
+using System.Threading;
+using System.Threading.Tasks;
 #if NET45
 using System.Web.Script.Serialization;
 #endif
@@ -21,6 +23,9 @@ namespace StackExchange.Profiling
         private readonly long _startTicks;
         private readonly decimal? _minSaveMs;
         private readonly bool _includeChildrenWithMinSave;
+
+        // used for concurrent access detection
+        private int _threadsAccessing = 0;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="Timing"/> class. 
@@ -253,19 +258,43 @@ namespace StackExchange.Profiling
         /// </remarks>
         public void AddChild(Timing timing)
         {
-            if (Children == null)
+            if (Interlocked.Increment(ref _threadsAccessing) > 1)
+                throw new Exception("Concurrent access");
+
+            try
+            {
+                if (Children == null)
                 Children = new List<Timing>();
 
-            Children.Add(timing);
-            if(timing.Profiler == null)
-                timing.Profiler = Profiler;
-            timing.ParentTiming = this;
-            timing.ParentTimingId = Id;
-            if (Profiler != null)
-                timing.MiniProfilerId = Profiler.Id;
+                Children.Add(timing);
+                if(timing.Profiler == null)
+                    timing.Profiler = Profiler;
+                timing.ParentTiming = this;
+                timing.ParentTimingId = Id;
+                if (Profiler != null)
+                    timing.MiniProfilerId = Profiler.Id;
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _threadsAccessing);
+            }
         }
 
-        internal void RemoveChild(Timing timing) => Children?.Remove(timing);
+        internal void RemoveChild(Timing timing)
+        {
+            if (Interlocked.Increment(ref _threadsAccessing) > 1)
+                throw new Exception("Concurrent access");
+
+            Task.Delay(10).Wait();
+            try
+            {
+                Children?.Remove(timing);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _threadsAccessing);
+            }
+        }
 
         /// <summary>
         /// Adds <paramref name="customTiming"/> to this <see cref="Timing"/> step's dictionary of 
