@@ -261,6 +261,8 @@ namespace StackExchange.Profiling
             if (Interlocked.Increment(ref _threadsAccessing) > 1)
                 throw new Exception("Concurrent access");
 
+            Task.Delay(10).Wait();
+
             try
             {
                 if (Children == null)
@@ -285,7 +287,6 @@ namespace StackExchange.Profiling
             if (Interlocked.Increment(ref _threadsAccessing) > 1)
                 throw new Exception("Concurrent access");
 
-            Task.Delay(10).Wait();
             try
             {
                 Children?.Remove(timing);

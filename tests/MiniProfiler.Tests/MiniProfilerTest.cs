@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace StackExchange.Profiling.Tests
@@ -99,6 +101,36 @@ namespace StackExchange.Profiling.Tests
 
                 Assert.True(mp1.Root.Children.Contains(goodTiming));
                 Assert.True(!mp1.Root.Children.Contains(badTiming));
+            }
+        }
+
+        [Fact]
+        public async Task ConcurrencyTest()
+        {
+            MiniProfiler.Settings.ProfilerProvider = new DefaultProfilerProvider();
+
+            MiniProfiler.Settings.ProfilerProvider.Start("test");
+            var profiler = MiniProfiler.Current;
+            var service = new FooService();
+            using (profiler.Step("action"))
+            {
+                var tasks = new List<Task>();
+                for (int i = 0; i < 100; i++)
+                {
+                    tasks.Add(service.FooAsync());
+                }
+                await Task.WhenAll(tasks);
+            }
+        }
+
+        class FooService
+        {
+            public async Task FooAsync()
+            {
+                using (MiniProfiler.Current.Step("foo async"))
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+                }
             }
         }
 
