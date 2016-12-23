@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>MiniProfiler.EF6</id>
-    <version>3.0.11</version>
-    <authors>Jarrod Dixon, Yaakov Ellis</authors>
-    <owners>Jarrod Dixon, Yaakov Ellis</owners>
+    <id>MiniProfilerAsync.EF6</id>
+    <version>3.0.12</version>
+    <authors>rev.com</authors>
+    <owners>rev.com</owners>
     <description>MiniProfiler integration for Entity Framework 6</description>
     <projectUrl>http://miniprofiler.com</projectUrl>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <tags>profiler sql mvc asp.net performance profiling timing entityframework</tags>
     <dependencies>
-      <dependency id="MiniProfiler" version="3.0.10"/>
+      <dependency id="MiniProfilerAsync" version="3.3.0.0"/>
       <dependency id="EntityFramework" version="6.0.1" />
     </dependencies>
     <language>en-US</language>
