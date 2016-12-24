@@ -139,7 +139,6 @@ namespace Samples.Mvc5.Controllers
             var service = new FooService();
             using (profiler.Step("action"))
             {
-                var head = profiler.Head;
                 var tasks = new List<Task>();
                 for (int i = 0; i < 10; i++)
                 {
