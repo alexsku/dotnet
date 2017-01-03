@@ -142,7 +142,7 @@ namespace Samples.Mvc5.Controllers
                 var tasks = new List<Task>();
                 for (int i = 0; i < 10; i++)
                 {
-                    tasks.Add(service.FooAsync(profiler));
+                    tasks.Add(service.FooAsync());
                 }
                 await Task.WhenAll(tasks);
                 return Content("All good");
@@ -151,8 +151,9 @@ namespace Samples.Mvc5.Controllers
 
         class FooService
         {
-            public async Task FooAsync(MiniProfiler profiler)
+            public async Task FooAsync()
             {
+                var profiler = MiniProfiler.Current;
                 await Task.Delay(10).ConfigureAwait(false);
                 using (profiler.Step("foo async"))
                 {
