@@ -10,6 +10,8 @@ using StackExchange.Profiling.Data;
 using Samples.Mvc5.EfModelFirst;
 using Samples.Mvc5.EFCodeFirst;
 using Samples.Mvc5.Helpers;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Samples.Mvc5.Controllers
 {
@@ -130,6 +132,35 @@ namespace Samples.Mvc5.Controllers
         /// </summary>
         /// <returns>The <see cref="ActionResult"/>.</returns>
         public ActionResult ResultsAuthorization() => View();
+
+        public async Task<ActionResult> CallAsync()
+        {
+            var profiler = MiniProfiler.Current;
+            var service = new FooService();
+            using (profiler.Step("action"))
+            {
+                var tasks = new List<Task>();
+                for (int i = 0; i < 10; i++)
+                {
+                    tasks.Add(service.FooAsync());
+                }
+                await Task.WhenAll(tasks);
+                return Content("All good");
+            }
+        }
+
+        class FooService
+        {
+            public async Task FooAsync()
+            {
+                var profiler = MiniProfiler.Current;
+                await Task.Delay(10).ConfigureAwait(false);
+                using (profiler.Step("foo async"))
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+                }
+            }
+        }
 
         /// <summary>
         /// fetch the route hits.
