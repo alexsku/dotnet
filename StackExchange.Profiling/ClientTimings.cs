@@ -22,7 +22,7 @@ namespace StackExchange.Profiling
         /// Gets or sets the list of client side timings
         /// </summary>  
         [DataMember(Order = 2)]
-        public List<ClientTiming> Timings
+        public IReadOnlyList<ClientTiming> Timings
         {
             get
             {

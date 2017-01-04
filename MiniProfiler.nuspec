@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>MiniProfilerAsync</id>
-    <version>3.3.0.0</version>
+    <id>RevMiniProfiler</id>
+    <version>3.3.0.1</version>
     <authors>Rev.com</authors>
     <owners>Rev.com</owners>
     <description>A slightly modified mini-profiler with a better support for async and multithreaded</description>
