@@ -80,7 +80,48 @@ namespace StackExchange.Profiling.Tests
             }
             time.Stop();
             _output.WriteLine("output");
-            _output.WriteLine($"With concurrent took: {time.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"With concurrent queue took: {time.Elapsed.TotalMilliseconds}ms");
+
+            var list3 = new ConcurrentBag<int>();
+            time.Restart();
+            for (int i = 0; i < 1000000; i++)
+            {
+                list3.Add(i);
+            }
+            time.Stop();
+            _output.WriteLine("output");
+            _output.WriteLine($"With concurrent bag took: {time.Elapsed.TotalMilliseconds}ms");
+
+            var list4 = new ConcurrentDictionary<int, int>();
+            time.Restart();
+            for (int i = 0; i < 1000000; i++)
+            {
+                list4.AddOrUpdate(i, i, (i1, i2) => i);
+            }
+            time.Stop();
+            _output.WriteLine("output");
+            _output.WriteLine($"With concurrent dictionary took: {time.Elapsed.TotalMilliseconds}ms");
+
+            list1 = new List<int>();
+            var lockCount = 0;
+            time.Restart();
+            for (int i = 0; i < 1000000; i++)
+            {
+                while (Interlocked.CompareExchange(ref lockCount, 1, 0) != 0) ;
+                try
+                {
+                    list1.Add(i);
+                }
+                finally
+                {
+                    lockCount = 0;
+                }
+            }
+            time.Stop();
+
+            _output.WriteLine("output");
+            _output.WriteLine($"With manual spinlock took: {time.Elapsed.TotalMilliseconds}ms");
+
         }
     }
 }
