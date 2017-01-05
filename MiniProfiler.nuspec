@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>RevMiniProfiler</id>
-    <version>3.3.0.1</version>
+    <version>3.3.0.2</version>
     <authors>Rev.com</authors>
     <owners>Rev.com</owners>
     <description>A slightly modified mini-profiler with a better support for async and multithreaded</description>

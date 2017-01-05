@@ -372,7 +372,11 @@ namespace StackExchange.Profiling
 
         private static JavaScriptSerializer GetJsonSerializer()
         {
-            return new JavaScriptSerializer { MaxJsonLength = Settings.MaxJsonResponseSize };   
+            var res = new JavaScriptSerializer { MaxJsonLength = Settings.MaxJsonResponseSize };
+
+            res.RegisterConverters(new[] { new ReadOnlyDictionaryConverter<IReadOnlyList<CustomTiming>>() });
+
+            return res;
         }
 
         /// <summary>
