@@ -18,6 +18,9 @@ namespace StackExchange.Profiling
         private const string ClientTimingPrefix = "clientPerformance[timing][";
         private const string ClientProbesPrefix = "clientProbes[";
         private readonly object _lockObject = new object();
+        private List<ClientTiming> _lastTimingsReturn;
+
+
         /// <summary>
         /// Gets or sets the list of client side timings
         /// </summary>  
@@ -27,12 +30,16 @@ namespace StackExchange.Profiling
             get
             {
                 lock(_lockObject)
-                    return _timings == null ? null : new List<ClientTiming>(_timings);
+                    return _lastTimingsReturn 
+                        ?? (_lastTimingsReturn = _timings == null ? null : new List<ClientTiming>(_timings));
             }
             set
             {
-                lock(_lockObject)
+                lock (_lockObject)
+                {
+                    _lastTimingsReturn = null;
                     _timings = value == null ? null : new List<ClientTiming>(value);
+                }
             }
         }
 

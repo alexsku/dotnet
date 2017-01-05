@@ -87,13 +87,15 @@ namespace StackExchange.Profiling
             {
                 lock(_lockObject)
                 {
-                    return _children == null ? null : new List<Timing>(_children);
+                    return _lastChildrenReturn 
+                        ?? (_lastChildrenReturn = (_children == null ? null : new List<Timing>(_children)));
                 }
             }
             set
             {
                 lock(_lockObject)
                 {
+                    _lastChildrenReturn = null;
                     _children = value == null ? null : new List<Timing>(value);
                 }
             }
@@ -105,7 +107,8 @@ namespace StackExchange.Profiling
         public void RemoveMatchingChildren(Predicate<Timing> match)
         {
             lock (_lockObject)
-            {   
+            {
+                _lastChildrenReturn = null;
                 _children?.RemoveAll(match);
             }
         }
@@ -120,13 +123,15 @@ namespace StackExchange.Profiling
             {
                 lock(_lockObject)
                 {
-                    return _customTimings?.ToDictionary(p => p.Key, p => (IReadOnlyList<CustomTiming>)new List<CustomTiming>(p.Value));
+                    return _lastCustomTimingsReturn 
+                        ?? (_lastCustomTimingsReturn = _customTimings?.ToDictionary(p => p.Key, p => (IReadOnlyList<CustomTiming>)new List<CustomTiming>(p.Value)));
                 }
             }
             set
             {
                 lock(_lockObject)
                 {
+                    _lastCustomTimingsReturn = null;
                     _customTimings = value?.ToDictionary(p => p.Key, p => new List<CustomTiming>(p.Value));
                 }
             }
@@ -148,6 +153,8 @@ namespace StackExchange.Profiling
             {
                 lock(_lockObject)
                 {
+                    _lastCustomTimingsReturn = null;
+
                     _customTimings = value.FromJson<Dictionary<string, List<CustomTiming>>>();
                 }
             }
@@ -326,6 +333,8 @@ namespace StackExchange.Profiling
         {
             lock(_lockObject)
             {
+                _lastChildrenReturn = null;
+
                 if (_children == null)
                     _children = new List<Timing>();
 
@@ -343,6 +352,8 @@ namespace StackExchange.Profiling
         {
             lock(_lockObject)
             {
+                _lastChildrenReturn = null;
+
                 if (_children != null)
                 {
                     _children.Remove(timing);
@@ -361,18 +372,25 @@ namespace StackExchange.Profiling
         {
             lock (_lockObject)
             {
+                _lastCustomTimingsReturn = null;
                 GetCustomTimingList(category).Add(customTiming);
             }
         }
 
         internal void RemoveCustomTiming(string category, CustomTiming customTiming)
         {
-            GetCustomTimingList(category).Remove(customTiming);
+            lock (_lockObject)
+            {
+                _lastCustomTimingsReturn = null;
+                GetCustomTimingList(category).Remove(customTiming);
+            }
         }
 
         private readonly object _lockObject = new object();
         private List<Timing> _children;
+        private List<Timing> _lastChildrenReturn; 
         private Dictionary<string, List<CustomTiming>> _customTimings;
+        private Dictionary<string, IReadOnlyList<CustomTiming>> _lastCustomTimingsReturn;
 
         /// <summary>
         /// Returns the <see cref="CustomTiming"/> list keyed to the <paramref name="category"/>, creating any collections when null.
