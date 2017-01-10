@@ -2,8 +2,8 @@
 <package>
   <metadata>
     <id>RevMiniProfiler</id>
-    <version>3.3.0.4</version>
-    <authors>Rev.com</authors>
+    <version>3.3.4</version>
+    <authors>Marc Gravell, Jarrod Dixon, Yaakov Ellis, Nick Craver, Rev.com</authors>
     <owners>Rev.com</owners>
     <description>A slightly modified mini-profiler with a better support for async and multithreaded</description>
     <projectUrl>http://miniprofiler.com</projectUrl>
