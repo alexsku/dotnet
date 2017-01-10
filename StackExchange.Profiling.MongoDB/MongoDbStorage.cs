@@ -155,16 +155,17 @@ namespace StackExchange.Profiling.MongoDB
 
         private void SaveClientTimings(MiniProfiler profiler)
         {
-            if (profiler.ClientTimings == null || profiler.ClientTimings.Timings == null || !profiler.ClientTimings.Timings.Any())
+            var clientTimings = profiler.ClientTimings?.Timings;
+            if (clientTimings == null || !clientTimings.Any())
                 return;
 
-            profiler.ClientTimings.Timings.ForEach(x =>
+            foreach (var x in clientTimings)
             {
                 x.MiniProfilerId = profiler.Id;
                 x.Id = Guid.NewGuid();
-            });
+            }
 
-            foreach (var clientTiming in profiler.ClientTimings.Timings)
+            foreach (var clientTiming in clientTimings)
             {
                 var clientTimingPoco = new ClientTimingPoco
                 {
@@ -179,7 +180,7 @@ namespace StackExchange.Profiling.MongoDB
             }
         }
 
-        private void SaveCustomTimings(Timing timing, KeyValuePair<string, List<CustomTiming>> customTimingsKV)
+        private void SaveCustomTimings(Timing timing, KeyValuePair<string, IReadOnlyList<CustomTiming>> customTimingsKV)
         {
             var key = customTimingsKV.Key;
             var value = customTimingsKV.Value;
@@ -260,7 +261,7 @@ namespace StackExchange.Profiling.MongoDB
             return childrenTimings;
         }
 
-        private Dictionary<string, List<CustomTiming>> LoadCustomTimings(Guid timingId)
+        private Dictionary<string, IReadOnlyList<CustomTiming>> LoadCustomTimings(Guid timingId)
         {
             var customTimingPocos = CustomTimings
                 .Find(Query<CustomTimingPoco>.EQ(poco => poco.TimingId, timingId))
@@ -269,7 +270,7 @@ namespace StackExchange.Profiling.MongoDB
             return customTimingPocos
                 .GroupBy(poco => poco.Key)
                 .ToDictionary(grp => grp.Key,
-                    grp => grp.OrderBy(poco => poco.StartMilliseconds)
+                    grp => (IReadOnlyList<CustomTiming>)grp.OrderBy(poco => poco.StartMilliseconds)
                         .Select(CustomTimingPocoToCustomTiming).ToList());
         }
 

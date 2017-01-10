@@ -14,14 +14,34 @@ namespace StackExchange.Profiling
     [DataContract]
     public class ClientTimings
     {
+        private List<ClientTiming> _timings;
         private const string ClientTimingPrefix = "clientPerformance[timing][";
         private const string ClientProbesPrefix = "clientProbes[";
+        private readonly object _lockObject = new object();
+        private List<ClientTiming> _lastTimingsReturn;
+
 
         /// <summary>
         /// Gets or sets the list of client side timings
-        /// </summary>
+        /// </summary>  
         [DataMember(Order = 2)]
-        public List<ClientTiming> Timings { get; set; }
+        public IReadOnlyList<ClientTiming> Timings
+        {
+            get
+            {
+                lock(_lockObject)
+                    return _lastTimingsReturn 
+                        ?? (_lastTimingsReturn = _timings == null ? null : new List<ClientTiming>(_timings));
+            }
+            set
+            {
+                lock (_lockObject)
+                {
+                    _lastTimingsReturn = null;
+                    _timings = value == null ? null : new List<ClientTiming>(value);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the redirect count.
